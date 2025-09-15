@@ -644,19 +644,36 @@ const LandingPage = () => {
                 Your journey through time
               </p>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl">
-              {DECADES.map((decade) => (
-                <PolaroidCard
-                  key={decade}
-                  caption={decade}
-                  status={generatedImages[decade]?.status || "pending"}
-                  imageUrl={generatedImages[decade]?.url}
-                  error={generatedImages[decade]?.error}
-                  onDownload={handleDownloadIndividualImage}
-                  isMobile={false}
-                />
-              ))}
-            </div>
+            {isMobile ? (
+              <div className="w-full max-w-sm flex-1 overflow-y-auto mt-4 space-y-4 p-4">
+                {DECADES.map((decade) => (
+                  <div key={decade} className="flex justify-center">
+                    <PolaroidCard
+                      caption={decade}
+                      status={generatedImages[decade]?.status || "pending"}
+                      imageUrl={generatedImages[decade]?.url}
+                      error={generatedImages[decade]?.error}
+                      onDownload={handleDownloadIndividualImage}
+                      isMobile={isMobile}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl">
+                {DECADES.map((decade) => (
+                  <PolaroidCard
+                    key={decade}
+                    caption={decade}
+                    status={generatedImages[decade]?.status || "pending"}
+                    imageUrl={generatedImages[decade]?.url}
+                    error={generatedImages[decade]?.error}
+                    onDownload={handleDownloadIndividualImage}
+                    isMobile={false}
+                  />
+                ))}
+              </div>
+            )}
             <div className="flex gap-4 mt-8">
               <button
                 onClick={handleDownloadAlbum}

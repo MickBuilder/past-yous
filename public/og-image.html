@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Past Yous - OG Image</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 1200px;
+            height: 630px;
+            font-family: 'Geist Mono', monospace;
+            background: linear-gradient(135deg, 
+                oklch(0.1797 0.0043 308.1928) 0%, 
+                oklch(0.3211 0 0) 25%,
+                oklch(0.2520 0 0) 50%,
+                oklch(0.1822 0 0) 75%,
+                oklch(0.1797 0.0043 308.1928) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Gradient overlay */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 20%, oklch(0.7214 0.1337 49.9802 / 0.15), transparent 60%),
+                        radial-gradient(circle at 70% 80%, oklch(0.5940 0.0443 196.0233 / 0.1), transparent 60%);
+            z-index: 1;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+        }
+        
+        .title {
+            font-size: 72px;
+            font-weight: 700;
+            color: oklch(0.8109 0 0);
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            letter-spacing: -2px;
+        }
+        
+        .subtitle {
+            font-size: 28px;
+            color: oklch(0.6268 0 0);
+            text-align: center;
+            margin-bottom: 50px;
+            font-weight: 400;
+        }
+        
+        .polaroids-container {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        .polaroid {
+            width: 120px;
+            height: 150px;
+            background: oklch(1.0000 0 0);
+            border-radius: 8px;
+            padding: 8px 8px 20px 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transform: rotate(var(--rotation));
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        
+        .polaroid:nth-child(1) { --rotation: -8deg; }
+        .polaroid:nth-child(2) { --rotation: 4deg; }
+        .polaroid:nth-child(3) { --rotation: -3deg; }
+        .polaroid:nth-child(4) { --rotation: 6deg; }
+        .polaroid:nth-child(5) { --rotation: -5deg; }
+        .polaroid:nth-child(6) { --rotation: 2deg; }
+        
+        .polaroid-image {
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(45deg, 
+                oklch(0.7214 0.1337 49.9802 / 0.3),
+                oklch(0.5940 0.0443 196.0233 / 0.3),
+                oklch(0.8721 0.0864 68.5474 / 0.3));
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .polaroid-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="40" cy="80" r="1.5" fill="rgba(255,255,255,0.08)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .polaroid-caption {
+            position: absolute;
+            bottom: 4px;
+            left: 8px;
+            right: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            color: oklch(0.2101 0.0318 264.6645);
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .features {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: oklch(0.8109 0 0);
+            font-size: 18px;
+        }
+        
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background: oklch(0.7214 0.1337 49.9802);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: oklch(0.1797 0.0043 308.1928);
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .cta {
+            margin-top: 30px;
+            background: oklch(0.7214 0.1337 49.9802);
+            color: oklch(0.1797 0.0043 308.1928);
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease;
+        }
+        
+        .cta:hover {
+            transform: translateY(-2px);
+        }
+        
+        .url {
+            position: absolute;
+            bottom: 30px;
+            right: 40px;
+            color: oklch(0.6268 0 0);
+            font-size: 16px;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Past Yous</h1>
+        <p class="subtitle">See yourself through the decades with AI</p>
+        
+        <div class="polaroids-container">
+            <div class="polaroid">
+                <div class="polaroid-image"></div>
+                <div class="polaroid-caption">60s</div>
+            </div>
+            <div class="polaroid">
+                <div class="polaroid-image"></div>
+                <div class="polaroid-caption">70s</div>
+            </div>
+            <div class="polaroid">
+                <div class="polaroid-image"></div>
+                <div class="polaroid-caption">80s</div>
+            </div>
+            <div class="polaroid">
+                <div class="polaroid-image"></div>
+                <div class="polaroid-caption">90s</div>
+            </div>
+            <div class="polaroid">
+                <div class="polaroid-image"></div>
+                <div class="polaroid-caption">2000s</div>
+            </div>
+            <div class="polaroid">
+                <div class="polaroid-image"></div>
+                <div class="polaroid-caption">Now</div>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">AI</div>
+                <span>AI-Powered</span>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📸</div>
+                <span>6 Decades</span>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <span>Instant</span>
+            </div>
+        </div>
+        
+        <a href="#" class="cta">Generate Your Past Yous</a>
+        
+        <div class="url">pastyous.mikebapps.com</div>
+    </div>
+</body>
+</html>

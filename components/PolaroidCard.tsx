@@ -57,17 +57,21 @@ const PolaroidCard: React.FC<PolaroidCardProps> = ({ imageUrl, caption, status, 
     const [isDeveloped, setIsDeveloped] = useState(isUserUploadCard);
     const [isImageLoaded, setIsImageLoaded] = useState(false);
 
+
+
     // This effect manages the state for the developing animation.
     useEffect(() => {
         // For the user's card, we only need to reset the loaded flag when the image changes.
         if (isUserUploadCard) {
             setIsImageLoaded(false);
+            // For user upload cards, immediately set as developed since we don't want the developing animation
+            setIsDeveloped(true);
             return;
         }
 
-        // For AI-generated cards, we reset the animation states when they are pending
-        // or when a new image URL is provided, to allow the animation to re-run.
-        if ((status === 'pending') || (status === 'done' && imageUrl)) {
+        // For AI-generated cards, we only reset the animation states when they are pending
+        // When status becomes 'done', we should NOT reset the states - let the image show
+        if (status === 'pending') {
             setIsDeveloped(false);
             setIsImageLoaded(false);
         }
@@ -151,35 +155,51 @@ const PolaroidCard: React.FC<PolaroidCardProps> = ({ imageUrl, caption, status, 
                             src={imageUrl}
                             alt={caption}
                             onLoad={() => setIsImageLoaded(true)}
-                            className={cn(
-                                'w-full h-full object-cover',
-                                // User's photo gets a quick fade, generated photos get the slow "developing" effect.
-                                isUserUploadCard
-                                    ? 'transition-opacity duration-300'
-                                    : 'transition-all duration-[4000ms] ease-in-out',
-                                // Visual styles for the "developing" animation.
-                                isDeveloped
-                                    ? 'opacity-100 filter-none'
-                                    : 'opacity-80 filter sepia(1) contrast(0.8) brightness(0.8)'
-                            )}
-                            style={{ opacity: isImageLoaded ? 1 : 0 }}
+                            onError={(e) => {
+                                console.error(`Image failed to load for ${caption}:`, e);
+                            }}
+                            style={{ 
+                                opacity: 1, 
+                                display: 'block',
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                            }}
+                            className="w-full h-full object-cover"
                         />
                     </>
                 )}
                 {status === 'done' && !imageUrl && <Placeholder />}
             </div>
             <div className="absolute bottom-4 left-4 right-4 text-center px-2">
-                <p className={cn(
-                    "font-mono text-lg truncate",
-                    "text-[var(--card-foreground)]"
-                )}>
-                    {caption}
-                </p>
+                <div className="flex items-center justify-center gap-2">
+                    <p className={cn(
+                        "font-mono text-lg truncate",
+                        "text-[var(--card-foreground)]"
+                    )}>
+                        {caption}
+                    </p>
+                    {/* Download button in caption for mobile */}
+                    {isMobile && onDownload && status === 'done' && imageUrl && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDownload(caption);
+                            }}
+                            className="p-1.5 bg-[var(--card-foreground)]/20 rounded-full text-[var(--card-foreground)] hover:bg-[var(--card-foreground)]/30 focus:outline-none focus:ring-2 focus:ring-[var(--card-foreground)]/50 transition-colors duration-200"
+                            aria-label={`Download image for ${caption}`}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
             </div>
         </>
     );
 
-    if (isMobile) {
+    if (isMobile || !dragConstraintsRef) {
         return (
             <div className="bg-[var(--card)] !p-4 !pb-16 flex flex-col items-center justify-start aspect-[3/4] w-80 max-w-full rounded-md shadow-xl relative transition-transform duration-200 hover:scale-105">
                 {cardInnerContent}

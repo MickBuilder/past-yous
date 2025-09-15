@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "generate-og": "node scripts/generate-og-image.js"
+    "generate-og": "node scripts/generate-og-image.js",
+    "generate-whatsapp-og": "node scripts/generate-whatsapp-og.js",
+    "convert-favicon": "node scripts/convert-svg-to-png.js"
   },
   "dependencies": {
     "@google/genai": "^1.14.0",

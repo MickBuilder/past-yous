@@ -43,9 +43,9 @@ export async function createAlbumPage(imageData: Record<string, string>): Promis
     ctx.font = `bold 100px 'JetBrains Mono', monospace`;
     ctx.fillText('Generated with Past Yous', canvasWidth / 2, 150);
 
-    ctx.font = `50px 'Geist Mono', monospace`;
-    ctx.fillStyle = '#a0a0a0'; // Muted foreground
-    ctx.fillText('on Google AI Studio', canvasWidth / 2, 220);
+    // ctx.font = `50px 'Geist Mono', monospace`;
+    // ctx.fillStyle = '#a0a0a0'; // Muted foreground
+    // ctx.fillText('on Google AI Studio', canvasWidth / 2, 220);
 
     // 3. Load all the polaroid images concurrently
     const decades = Object.keys(imageData);

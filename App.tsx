@@ -8,6 +8,8 @@ import { redirectToCheckout } from "./services/stripeService";
 import Hyperspeed from "./components/Hyperspeed";
 import PrivacyPolicyModal from "./components/PrivacyPolicyModal";
 import SupportModal from "./components/SupportModal";
+import BounceCards from "./components/BounceCards";
+import JSZip from "jszip";
 
 // Umami tracking helper
 const trackEvent = (eventName: string, eventData?: Record<string, any>) => {
@@ -132,6 +134,7 @@ const LandingPage = () => {
     Record<string, GeneratedImage>
   >({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState<boolean>(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -288,6 +291,9 @@ const LandingPage = () => {
 
     const concurrencyLimit = 2;
     const decadesQueue = [...DECADES];
+    
+    // Track successful generations locally since state updates are asynchronous
+    let successfulGenerations = 0;
 
     const processDecade = async (decade: string) => {
       console.log(`Starting generation for ${decade}...`);
@@ -298,6 +304,7 @@ const LandingPage = () => {
           `Successfully generated image for ${decade}, URL length:`,
           resultUrl.length
         );
+        successfulGenerations++;
         setGeneratedImages((prev) => {
           const newState = {
             ...prev,
@@ -332,7 +339,7 @@ const LandingPage = () => {
     
     trackEvent('ai-generation-completed', {
       totalDecades: DECADES.length,
-      successfulGenerations: Object.values(generatedImages).filter(img => (img as GeneratedImage).status === 'done').length,
+      successfulGenerations: successfulGenerations,
       timestamp: new Date().toISOString()
     });
   };
@@ -423,7 +430,7 @@ const LandingPage = () => {
       });
       const link = document.createElement("a");
       link.href = image.url;
-      link.download = `past-yous-${decade}.jpg`;
+      link.download = `retro-ai-${decade}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -463,7 +470,7 @@ const LandingPage = () => {
       const albumDataUrl = await createAlbumPage(imageData);
       const link = document.createElement("a");
       link.href = albumDataUrl;
-      link.download = "past-yous-album.jpg";
+      link.download = "retro-ai-album.jpg";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -482,6 +489,84 @@ const LandingPage = () => {
     }
   };
 
+  // Download all images + album as zip
+  const handleDownloadAll = async () => {
+    setIsDownloading(true);
+    try {
+      trackEvent('zip-download-initiated', {
+        timestamp: new Date().toISOString()
+      });
+
+      const zip = new JSZip();
+      const imageData = Object.entries(generatedImages)
+        .filter(
+          ([, image]) =>
+            (image as GeneratedImage).status === "done" &&
+            (image as GeneratedImage).url
+        )
+        .reduce(
+          (acc, [decade, image]) => ({
+            ...acc,
+            [decade]: (image as GeneratedImage)!.url!,
+          }),
+          {} as Record<string, string>
+        );
+
+      if (Object.keys(imageData).length === 0) {
+        trackEvent('zip-download-failed', {
+          reason: 'no-successful-images',
+          timestamp: new Date().toISOString()
+        });
+        alert("No images were generated successfully. Cannot create zip file.");
+        return;
+      }
+
+      // Fetch and add individual images to zip
+      for (const [decade, url] of Object.entries(imageData)) {
+        try {
+          const response = await fetch(url);
+          const blob = await response.blob();
+          zip.file(`retro-ai-${decade}.jpg`, blob);
+        } catch (error) {
+          console.error(`Failed to fetch image for ${decade}:`, error);
+        }
+      }
+
+      // Create and add album to zip
+      try {
+        const albumDataUrl = await createAlbumPage(imageData);
+        const albumBlob = await fetch(albumDataUrl).then(res => res.blob());
+        zip.file("retro-ai-album.jpg", albumBlob);
+      } catch (error) {
+        console.error("Failed to create album for zip:", error);
+      }
+
+      // Generate zip file and download
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(zipBlob);
+      link.download = "retro-ai-all-images.zip";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+
+      trackEvent('zip-download-success', {
+        imageCount: Object.keys(imageData).length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Failed to create or download zip:", error);
+      trackEvent('zip-download-error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+      alert("Sorry, there was an error creating the zip file. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen w-full flex flex-col items-center justify-center p-4 pb-24 overflow-hidden relative isolate">
       <input
@@ -493,17 +578,17 @@ const LandingPage = () => {
         onChange={handleImageUpload}
       />
       <div className="z-10 flex flex-col items-center justify-center w-full h-full flex-1 min-h-0">
-        <div className="text-center mb-10">
-          <h1 className="text-6xl md:text-8xl font-mono font-bold">
-            Past Yous
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="text-5xl md:text-7xl font-mono font-bold">
+            Retro AI
           </h1>
-          <p className="font-sans text-[var(--muted-foreground)] mt-2 text-xl tracking-wide">
-            See yourself through the decades.
+          <p className="font-sans text-[var(--muted-foreground)] mt-2 text-lg md:text-xl tracking-wide">
+            Travel Through Time
           </p>
         </div>
 
         {appState === "idle" && (
-          <div className="relative flex flex-col items-center justify-center w-full">
+          <div className="relative flex items-center justify-center w-full max-w-7xl mx-auto px-4">
             {/* Hyperspeed background animation - only show when idle */}
             {appState === "idle" && (
               <div className="absolute inset-0 w-full h-full">
@@ -538,34 +623,57 @@ const LandingPage = () => {
                 />
               </div>
             )}
+            
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 1 }}
-              className="flex flex-col items-center w-full max-w-4xl relative z-10"
+              className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 w-full max-w-7xl relative z-10"
             >
-              <div className="mb-20 text-center">
-                <label
-                  htmlFor="file-upload"
-                  className="cursor-pointer group transform hover:scale-105 transition-transform duration-300 inline-block"
+              {/* Left Side - Original PolaroidCard Upload Component */}
+              <div className="flex flex-col items-center justify-center lg:flex-shrink-0">
+                <motion.div
+                  initial={{ x: -50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.7, duration: 0.6 }}
                 >
-                  <PolaroidCard caption="Click to Upload" status="done" />
-                </label>
+                  <label
+                    htmlFor="file-upload"
+                    className="cursor-pointer group transform hover:scale-105 transition-transform duration-300 inline-block"
+                  >
+                    <PolaroidCard caption="Click to Upload" status="done" />
+                  </label>
+                </motion.div>
               </div>
 
-              <div className="text-center max-w-2xl mx-auto mt-8">
-                <h2 className="text-4xl font-mono font-bold tracking-tight">
-                  Travel Through Time
-                </h2>
-                <p className="mt-4 text-lg text-[var(--muted-foreground)]">
-                  Ever wondered what you'd look like in a different era? Upload
-                  a single photo, and our AI will reimagine you in the iconic
-                  styles of past decades.
-                </p>
-              </div>
-
-              <div className="mt-12 w-full">
-                <RollingGallery />
+              {/* Center - Bounce Cards */}
+              <div className="flex flex-col items-center justify-start relative flex-1 w-full">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8, duration: 0.6 }}
+                  className="text-center mb-4 md:mb-6"
+                >
+                  <h2 className="text-2xl md:text-3xl font-mono font-bold mb-2">
+                    See Yourself Through the Decades
+                  </h2>
+                  <p className="text-sm md:text-base text-[var(--muted-foreground)] max-w-md mx-auto">
+                    Upload your photo and get 6 AI-generated images showing you in the iconic styles of the 60s, 70s, 80s, 90s, 2000s, and today
+                  </p>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.9, duration: 0.6 }}
+                  className="w-full h-full min-h-[350px] md:min-h-[450px] relative flex items-start justify-center"
+                >
+                  <BounceCards
+                    images={Object.entries(EXAMPLE_IMAGES).map(([decade, url]) => ({
+                      url,
+                      caption: `The ${decade.replace('s', "'s")}`
+                    }))}
+                  />
+                </motion.div>
               </div>
             </motion.div>
           </div>
@@ -595,7 +703,7 @@ const LandingPage = () => {
           <div className="flex flex-col items-center gap-6 relative z-20">
             <div className="text-center">
               <h2 className="text-4xl font-mono font-bold mb-4">
-                Generating Your Past Yous...
+                Generating Your Retro AI Images...
               </h2>
               <p className="text-lg text-[var(--muted-foreground)]">
                 This may take a few minutes
@@ -638,12 +746,54 @@ const LandingPage = () => {
           <div className="flex flex-col items-center gap-6 relative z-20">
             <div className="text-center mb-8">
               <h2 className="text-4xl font-mono font-bold mb-4">
-                Your Past Yous
+                Your Retro AI Images
               </h2>
               <p className="text-lg text-[var(--muted-foreground)]">
                 Your journey through time
               </p>
             </div>
+            {/* Error message when generation fails */}
+            {Object.values(generatedImages).some(
+              (img) => (img as GeneratedImage).status === "error"
+            ) && (
+              <div className="max-w-2xl mx-auto mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-red-400 flex-shrink-0 mt-0.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <div className="flex-1">
+                    <h3 className="font-mono font-bold text-red-400 mb-2">
+                      Some images failed to generate
+                    </h3>
+                    <p className="text-sm text-[var(--muted-foreground)] mb-3">
+                      For best results, please avoid uploading:
+                    </p>
+                    <ul className="text-sm text-[var(--muted-foreground)] space-y-1 list-disc list-inside">
+                      <li>Low quality or blurry photos</li>
+                      <li>Photos with multiple people (use single person photos)</li>
+                      <li>Photos where the face is partially obscured or at extreme angles</li>
+                      <li>Drawings, paintings, or AI-generated images</li>
+                      <li>Photos with heavy filters or extreme editing</li>
+                      <li>Very dark or overexposed photos</li>
+                    </ul>
+                    <p className="text-sm text-[var(--muted-foreground)] mt-3">
+                      Try uploading a clear, well-lit photo of a single person facing the camera.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             {isMobile ? (
               <div className="w-full max-w-sm flex-1 overflow-y-auto mt-4 space-y-4 p-4">
                 {DECADES.map((decade) => (
@@ -676,10 +826,11 @@ const LandingPage = () => {
             )}
             <div className="flex gap-4 mt-8">
               <button
-                onClick={handleDownloadAlbum}
-                className={primaryButtonClasses}
+                onClick={handleDownloadAll}
+                disabled={isDownloading}
+                className={`${primaryButtonClasses} disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                Download Album
+                {isDownloading ? "Creating ZIP..." : "Download All (ZIP)"}
               </button>
               <button
                 onClick={() => {
@@ -690,7 +841,7 @@ const LandingPage = () => {
                 }}
                 className={secondaryButtonClasses}
               >
-                Start Over
+                Try Another Photo
               </button>
             </div>
           </div>
@@ -881,7 +1032,7 @@ const ResultsPage = () => {
     if (image?.status === "done" && image.url) {
       const link = document.createElement("a");
       link.href = image.url;
-      link.download = `past-yous-${decade}.jpg`;
+      link.download = `retro-ai-${decade}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -913,13 +1064,73 @@ const ResultsPage = () => {
       const albumDataUrl = await createAlbumPage(imageData);
       const link = document.createElement("a");
       link.href = albumDataUrl;
-      link.download = "past-yous-album.jpg";
+      link.download = "retro-ai-album.jpg";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (error) {
       console.error("Failed to create or download album:", error);
       alert("Sorry, there was an error creating your album. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleDownloadAll = async () => {
+    setIsDownloading(true);
+    try {
+      const zip = new JSZip();
+      const imageData = Object.entries(generatedImages)
+        .filter(
+          ([, image]) =>
+            (image as GeneratedImage).status === "done" &&
+            (image as GeneratedImage).url
+        )
+        .reduce(
+          (acc, [decade, image]) => ({
+            ...acc,
+            [decade]: (image as GeneratedImage)!.url!,
+          }),
+          {} as Record<string, string>
+        );
+
+      if (Object.keys(imageData).length === 0) {
+        alert("No images were generated successfully. Cannot create zip file.");
+        return;
+      }
+
+      // Fetch and add individual images to zip
+      for (const [decade, url] of Object.entries(imageData)) {
+        try {
+          const response = await fetch(url);
+          const blob = await response.blob();
+          zip.file(`retro-ai-${decade}.jpg`, blob);
+        } catch (error) {
+          console.error(`Failed to fetch image for ${decade}:`, error);
+        }
+      }
+
+      // Create and add album to zip
+      try {
+        const albumDataUrl = await createAlbumPage(imageData);
+        const albumBlob = await fetch(albumDataUrl).then(res => res.blob());
+        zip.file("retro-ai-album.jpg", albumBlob);
+      } catch (error) {
+        console.error("Failed to create album for zip:", error);
+      }
+
+      // Generate zip file and download
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(zipBlob);
+      link.download = "retro-ai-all-images.zip";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error("Failed to create or download zip:", error);
+      alert("Sorry, there was an error creating the zip file. Please try again.");
     } finally {
       setIsDownloading(false);
     }
@@ -935,12 +1146,54 @@ const ResultsPage = () => {
       <div className="z-10 flex flex-col items-center justify-center w-full h-full flex-1 min-h-0">
         <div className="text-center mb-10">
           <h1 className="text-6xl md:text-8xl font-mono font-bold">
-            Past Yous
+            Retro AI
           </h1>
           <p className="font-sans text-[var(--muted-foreground)] mt-2 text-xl tracking-wide">
             Your journey through time.
           </p>
         </div>
+        {/* Error message when generation fails */}
+        {Object.values(generatedImages).some(
+          (img) => (img as GeneratedImage).status === "error"
+        ) && (
+          <div className="max-w-2xl mx-auto mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <div className="flex items-start gap-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 text-red-400 flex-shrink-0 mt-0.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <div className="flex-1">
+                <h3 className="font-mono font-bold text-red-400 mb-2">
+                  Some images failed to generate
+                </h3>
+                <p className="text-sm text-[var(--muted-foreground)] mb-3">
+                  For best results, please avoid uploading:
+                </p>
+                <ul className="text-sm text-[var(--muted-foreground)] space-y-1 list-disc list-inside">
+                  <li>Low quality or blurry photos</li>
+                  <li>Photos with multiple people (use single person photos)</li>
+                  <li>Photos where the face is partially obscured or at extreme angles</li>
+                  <li>Drawings, paintings, or AI-generated images</li>
+                  <li>Photos with heavy filters or extreme editing</li>
+                  <li>Very dark or overexposed photos</li>
+                </ul>
+                <p className="text-sm text-[var(--muted-foreground)] mt-3">
+                  Try uploading a clear, well-lit photo of a single person facing the camera.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
         {isMobile ? (
           <div className="w-full max-w-sm flex-1 overflow-y-auto mt-4 space-y-4 p-4">
             {DECADES.map((decade) => (
@@ -985,14 +1238,14 @@ const ResultsPage = () => {
           {allDone && (
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <button
-                onClick={handleDownloadAlbum}
+                onClick={handleDownloadAll}
                 disabled={isDownloading}
                 className={`${primaryButtonClasses} disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                {isDownloading ? "Creating Album..." : "Download Album"}
+                {isDownloading ? "Creating ZIP..." : "Download All (ZIP)"}
               </button>
               <button onClick={handleReset} className={secondaryButtonClasses}>
-                Start Over
+                Try Another Photo
               </button>
             </div>
           )}

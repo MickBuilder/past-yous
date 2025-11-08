@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Script to generate Open Graph image for Past Yous
+ * Script to generate Open Graph image for Retro AI
  * This script uses Puppeteer to capture the OG image HTML as a PNG
  * 
  * Usage: node scripts/generate-og-image.js

@@ -39,7 +39,7 @@ async function generateWhatsAppOG() {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Past Yous - WhatsApp OG</title>
+        <title>Retro AI - WhatsApp OG</title>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;700&display=swap');
           
@@ -195,8 +195,8 @@ async function generateWhatsAppOG() {
       </head>
       <body>
         <div class="container">
-          <h1 class="title">Past Yous</h1>
-          <p class="subtitle">See yourself through the decades with AI</p>
+          <h1 class="title">Retro AI</h1>
+          <p class="subtitle">Travel Through Time with AI</p>
           
           <div class="polaroids-container">
             <div class="polaroid">

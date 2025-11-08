@@ -28,7 +28,7 @@ const Footer: React.FC<FooterProps> = ({ onPrivacyClick, onSupportClick }) => {
                         </button>
                     </div>
                     <div className="text-center">
-                        <p className="text-xs">&copy; {currentYear} Past Yous. All Rights Reserved.</p>
+                        <p className="text-xs">&copy; {currentYear} Retro AI. All Rights Reserved.</p>
                     </div>
                 </div>
 
@@ -36,7 +36,7 @@ const Footer: React.FC<FooterProps> = ({ onPrivacyClick, onSupportClick }) => {
                 <div className="hidden sm:flex justify-between items-center gap-4">
                     {/* Left Side */}
                     <div className="flex items-center gap-4 whitespace-nowrap">
-                        <p>&copy; {currentYear} Past Yous. All Rights Reserved.</p>
+                        <p>&copy; {currentYear} Retro AI. All Rights Reserved.</p>
                     </div>
 
                     {/* Right Side - Navigation Links */}

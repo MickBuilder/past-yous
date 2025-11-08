@@ -173,12 +173,12 @@ const PolaroidCard: React.FC<PolaroidCardProps> = ({ imageUrl, caption, status, 
             </div>
             <div className="absolute bottom-4 left-4 right-4 text-center px-2">
                 <div className="flex items-center justify-center gap-2">
-                    <p className={cn(
-                        "font-mono text-lg truncate",
-                        "text-[var(--card-foreground)]"
-                    )}>
-                        {caption}
-                    </p>
+                <p className={cn(
+                    "font-mono text-lg truncate",
+                    "text-[var(--card-foreground)]"
+                )}>
+                    {caption}
+                </p>
                     {/* Download button in caption for mobile */}
                     {isMobile && onDownload && status === 'done' && imageUrl && (
                         <button

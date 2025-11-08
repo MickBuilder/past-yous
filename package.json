@@ -16,6 +16,7 @@
     "@stripe/stripe-js": "^4.1.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.12",
+    "jszip": "^3.10.1",
     "postprocessing": "^6.37.8",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -23,6 +24,7 @@
     "three": "^0.180.0"
   },
   "devDependencies": {
+    "@types/jszip": "^3.4.0",
     "@types/node": "^22.14.0",
     "puppeteer": "^23.0.0",
     "typescript": "~5.8.2",

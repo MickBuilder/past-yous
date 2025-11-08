@@ -240,7 +240,7 @@ async function generateWhatsAppOG() {
             </div>
           </div>
           
-          <div class="url">pastyous.mikebapps.com</div>
+          <div class="url">retroai.mikebapps.com</div>
         </div>
       </body>
       </html>

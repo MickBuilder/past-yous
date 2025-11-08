@@ -39,7 +39,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
           <div className="space-y-6 text-[var(--muted-foreground)]">
             <div>
               <h3 className="text-xl font-bold text-white italic mb-3">OUR COMMITMENT</h3>
-              <p>Your privacy is important to us. This policy explains what information we collect and how we use it when you use Past Yous.</p>
+              <p>Your privacy is important to us. This policy explains what information we collect and how we use it when you use Retro AI.</p>
             </div>
 
             <div>
@@ -97,7 +97,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose
 
             <div>
               <h3 className="text-xl font-bold text-white italic mb-3">CONTACT US</h3>
-              <p>If you have any questions about this Privacy Policy or wish to exercise your rights, please contact us at <a href="mailto:pastyous@mikebapps.com" className="text-yellow-500 hover:text-yellow-400">pastyous@mikebapps.com</a></p>
+              <p>If you have any questions about this Privacy Policy or wish to exercise your rights, please contact us at <a href="mailto:retroai@mikebapps.com" className="text-yellow-500 hover:text-yellow-400">retroai@mikebapps.com</a></p>
             </div>
 
             <div className="text-sm text-[var(--muted-foreground)] pt-4 border-t border-[var(--border)]">

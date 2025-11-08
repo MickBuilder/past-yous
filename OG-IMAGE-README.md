@@ -53,7 +53,7 @@ Check that `public/og-image.png` was created successfully.
 - **Polaroid Cards**: 6 cards with decade labels (60s, 70s, 80s, 90s, 2000s, Now)
 - **Features**: AI-Powered, 6 Decades, Instant
 - **CTA**: "Generate Your Past Yous" button
-- **URL**: pastyous.mikebapps.com
+- **URL**: retroai.mikebapps.com
 
 ### Technical Details
 - **High DPI**: 2x device scale factor for crisp images
@@ -99,7 +99,7 @@ To modify the OG image:
 Make sure to:
 1. Generate the OG image before deployment
 2. Upload `og-image.png` to your hosting provider
-3. Verify the image URL in meta tags matches your domain (https://pastyous.mikebapps.com/)
+3. Verify the image URL in meta tags matches your domain (https://retroai.mikebapps.com/)
 4. Test social media sharing on Facebook/Twitter
 
 ## Troubleshooting

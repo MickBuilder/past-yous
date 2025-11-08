@@ -40,7 +40,7 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
             <div>
               <h3 className="text-xl font-bold text-white italic mb-3">GET IN TOUCH</h3>
               <p className="mb-4">
-                We'd love to hear from you! Whether you have a question about Past Yous, a suggestion for a new decade, 
+                We'd love to hear from you! Whether you have a question about Retro AI, a suggestion for a new decade, 
                 or a collaboration proposal, please feel free to reach out.
               </p>
               <p className="mb-4">
@@ -59,7 +59,7 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
             <div>
               <h3 className="text-xl font-bold text-white italic mb-3">FEEDBACK</h3>
               <p className="mb-4">
-                We're constantly improving Past Yous. Your feedback helps us make the service better. 
+                We're constantly improving Retro AI. Your feedback helps us make the service better. 
                 Share your ideas for new features, decades, or improvements!
               </p>
             </div>
@@ -76,10 +76,10 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
             <div className="bg-[var(--background)] rounded-lg p-4 border border-[var(--border)]">
               <p className="text-[var(--muted-foreground)] mb-2">Email:</p>
               <a 
-                href="mailto:pastyous@mikebapps.com" 
+                href="mailto:retroai@mikebapps.com" 
                 className="text-yellow-500 hover:text-yellow-400 font-mono text-lg transition-colors duration-200"
               >
-                pastyous@mikebapps.com
+                retroai@mikebapps.com
               </a>
             </div>
 
